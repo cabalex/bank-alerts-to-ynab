@@ -18,6 +18,7 @@ app.post("/webhook/:account_id?", async (request, response) => {
   console.log("Webhook received");
   
   const account_id = request.params.account_id;
+  console.log(request.body);
   const body_plain = request.body.plain;
   
   try {
