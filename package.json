@@ -14,9 +14,6 @@
     "body-parser": "^1.18.3",
     "ynab": "^1.5.0"
   },
-  "engines": {
-    "node": "8.x"
-  },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-express"
   },
