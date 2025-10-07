@@ -37,7 +37,11 @@ const parsers = [
   // PayPal
   // Example:
   //   You sent $150.00 USD to John Doe\n\nTransaction Details\n\nTransaction ID: 111111111 August 11, 2018
-  { bank: 'PayPal Payment', regex: /You sent a payment for \$?(\d+.\d+)[\s\S]*to (\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3})[\s\S]*Sent on:(\w+) (\d+), (\d{4})/, amount_group: 1, payee_group: 2, month_group: 3, day_group: 4, year_group: 5, inverse_amount: true }
+  { bank: 'PayPal Payment', regex: /You sent a payment for \$?(\d+.\d+)[\s\S]*to (\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3})[\s\S]*Sent on:(\w+) (\d+), (\d{4})/, amount_group: 1, payee_group: 2, month_group: 3, day_group: 4, year_group: 5, inverse_amount: true },
+  // Wescom
+  // Example:
+  // Your Wescom card ending in XXXX was used at NAME in LOCATION US for a $0.00 purchase. Report fraud/disputes
+  { bank: 'Wescom', regex: /Your Wescom card ending in \d+ was used at ([\s\S]*) in [\s\S]* for a \$(\d+.\d+) purchase/, amount_group: 2, payee_group: 1, month_group: null, day_group: null, year_group: null, inverse_amount: false }
 ];
 
 function parse(msg){
@@ -53,18 +57,28 @@ function parse(msg){
       if (inverse_amount){
         amount = (amount * -1).toString();
       }
+      
       const payee = matches[payee_group];
-      const year = matches[year_group];      
-      const day = matches[day_group];
+      let date;
+      if (month_group == null || day_group == null || year_group == null){
+        // No date provided, use today's date
+        const today = new Date();
+        date = today.toISOString().split('T')[0];
+      } else {
+        const year = matches[year_group];      
+        const day = matches[day_group];
 
-      let month = matches[month_group];
-      if (month.match(/[A-Za-z]/)) {
-        // Translate month name to month number (i.e. 'June' -> '6')
-        month = (new Date(`${month}-1-01`).getMonth()+1).toString();      
+        let month = matches[month_group];
+        if (month.match(/[A-Za-z]/)) {
+          // Translate month name to month number (i.e. 'June' -> '6')
+          month = (new Date(`${month}-1-01`).getMonth()+1).toString();      
+        }
+
+        // Format date as ISO (2018-08-27)
+        date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
       }
 
-      // Format date as ISO (2018-08-27)
-      const date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+      
 
       result = { date, payee, amount }; 
       break;

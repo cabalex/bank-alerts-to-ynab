@@ -18,11 +18,11 @@ app.post("/webhook/:account_id?", async (request, response) => {
   console.log("Webhook received");
   
   const account_id = request.params.account_id;
-  console.log(request.body);
-  const body_plain = request.body.plain;
+  // plain now returns null, so parse the body
+  const body = request.body.html;
+  const body_plain = body.replace(/<\/?("[^"]*"|'[^']*'|[^>])*(>|$)/g, "");
   
   try {
-    console.log(body_plain);
     const parsed = parser.parse(body_plain);
     
     if (parsed == null){
