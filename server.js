@@ -28,6 +28,7 @@ app.post("/webhook/:account_id?", async (request, response) => {
     if (parsed == null){
       // Send 501 Not Implemented when message cannot be parsed
       console.log("Could not be parsed");
+      console.log(body_plain);
       response.sendStatus(501);
       return;
     }
